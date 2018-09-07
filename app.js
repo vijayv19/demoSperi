@@ -22,16 +22,28 @@ sqlConnection.connect(function (err) {
     }
 });
 
-// app.get('/', function (req, res) {
-//     sqlConnection.query("SELECT * FROM demoProject", function (err, rows, fields) {
-//         if (err) {
-//             console.log('**** err in query****', err);
-//         } else {
-//             console.log('****success fulu query****');
+var user = {
+    first_name: "vijay",
+    last_name: "vaidya",
+    email: "mvijayvaidya99@gmail.com",
+    address: "ghatkopar",
+    status: "active",
+    password: "admin@1234",
+    otp: "wqerqq",
+    // dob: "19-10-1993",
+    userType: "admin"
+}
 
-//         }
-//     });
-// })
+
+var query = sqlConnection.query('insert into users set ?', user,
+    function (err, results) {
+        if (err) {
+            console.log('**** err in query****', err);
+        } else {
+            console.log('****data inserted successfully****', results);
+
+        }
+    });
 
 // app.listen(8080);
 
