@@ -1,10 +1,11 @@
 // Module dependencies
 
-const express = require('express'),
-    mysql = require('mysql'),
-    app = express(),
-    bodyParser = require('body-parser');
-
+var express = require('express');
+var path = require('path');
+var mysql = require('mysql');
+var usersRouter = require('./routes/users');
+var promise = require('promise');
+var bodyParser = require('body-parser');
 
 
 // Create connection to db
