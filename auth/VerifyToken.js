@@ -1,17 +1,16 @@
 var jwt = require('jsonwebtoken');
 var config = require('../config');
 
-module.exports.verifyToken = function (tokenID, callback, next) {
+module.exports.verifyToken = function (tokenID, callback) {
     var token = tokenID;
     if (!token) {
-        callback(err, null, 'Token not provided')
+        callback(null, 'Token not provided');
     }
     jwt.verify(token, config.secret, function (err, decoded) {
-        console.log('**** inside decoded of VerifyToken.js & data is ****', decoded);
         if (err) {
-            callback(err, null, 'User is unauthorised');
+            callback(err, null, 'User is Unauthorised');
         } else {
-            callback(null, decoded);
+            callback(null, 'User is successfully Authenticated');
         }
     });
 };

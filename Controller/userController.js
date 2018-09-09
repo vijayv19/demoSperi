@@ -1,43 +1,48 @@
-var app = require('../app');
 var express = require('express');
-var trans = express.Router();
-var routes = require('../routes/dealer');
-var database = require('../Database/database');
-const dealer = require('../Modules/dealerModule');
+var users = require('../module/userModule');
 var jwt = require('jsonwebtoken');
-var bcrypt = require('bcryptjs');
 var config = require('../config');
 var auth = require('../auth/VerifyToken');
-var logger = require('../LogConfig/loghelper').logger;
+var logger = require('../logs/logInfo').logger;
 
 
 
-//-Get Users Data based on userid.
+//-Get Users Data based on userid or email id or all userdata
 
 exports.getUserInfo = function (req, res) {
-    console.log('**** inside getDealerInfo of dealerController.js & data is ****');
     var token = req.headers['x-access-token'];
+    // console.log('****===========token=========== ****', req.body);
     auth.verifyToken(token, function (err, decoded) {
         if (err) {
             res.send({
-                "Error Code": 00,
+                "Error Code": 410,
                 "Message": 'Invalid Token',
                 "Error": err
             });
         } else {
-            var LogidealerData = {
-                DealerID: req.body.DealerID
+            var UserData = {};
+            if (req.body.email) {
+                UserData = {
+                    email: req.body.email
+                };
+            } else if (req.body.userid) {
+                UserData = {
+                    userid: req.body.userid
+                };
+            } else {
+                UserData = '';
             }
-            dealer.dealerInfo(LogidealerData.DealerID, function (err, results) {
+            // console.log('****UserData ****', UserData);
+            users.userInfo(UserData, function (err, results) {
                 if (err) {
                     logger.error({
                         err: err
-                    }, 'Error Described')
+                    }, 'Error Described');
                     res.send({
                         "Error": err,
                     });
                 } else {
-                    logger.info('Into the final response', results);
+                    // logger.info('Into the final response', results);
                     res.send({
                         "error": 0,
                         "code": 200,
@@ -51,24 +56,22 @@ exports.getUserInfo = function (req, res) {
     });
 };
 
-//- Dealer Registration with token.
-exports.dealerRegistration = function (req, res) {
-    console.log('**** inside dealerRegistration of dealerController.js & data is ****');
-    var hashedPassword = bcrypt.hashSync(req.body.DealerPassword, 8);
-    console.log('**** inside hashedPassword of dealerController.js & data is ****');
+//- Registration of User with token.
+exports.postUserInfo = function (req, res) {
+    console.log('**** req.body ****', req.body);
     var UserInputData = {
-        "DealerName": req.body.DealerName,
-        "DealerAddress": req.body.DealerAddress,
-        "DealerType": req.body.DealerType,
-        "DealerPAN": req.body.DealerPAN,
-        "DealerPhone": req.body.DealerPhone,
-        "ParentID": req.body.ParentID,
-        "DealerEmail": req.body.DealerEmail,
-        "DealerPassword": hashedPassword
-
+        "userid": req.body.userid,
+        "first_name": req.body.first_name,
+        "last_name": req.body.last_name,
+        "email": req.body.email,
+        "address": req.body.address,
+        "status": req.body.status,
+        "password": req.body.password,
+        "userType": req.body.userType,
+        "otp": req.body.otp,
+        "dob": req.body.dob
     };
-    console.log('**** inside UserInputData of dealerController.js & data is ****');
-    dealer.registration(UserInputData, function (err, result, dealrID) {
+    users.registration(UserInputData, function (err, result, EmailID) {
         if (err) {
             res.send({
                 "Error Code": 101,
@@ -77,14 +80,14 @@ exports.dealerRegistration = function (req, res) {
         } else {
             // create a token
             var token = jwt.sign({
-                DealerID: dealrID,
+                email: EmailID,
             }, config.secret, {
                 expiresIn: 86400 // expires in 24 hours
             });
             res.send({
                 "error": 0,
                 "code": 200,
-                "DealerID": dealrID,
+                "Email": EmailID,
                 "Data": result,
                 "auth": true,
                 "Token": token
@@ -94,35 +97,34 @@ exports.dealerRegistration = function (req, res) {
 };
 
 
-//-Dealer login, generates token.
-exports.dealerLogin = function (req, res) {
-    var LoginData = {
-        DealerEmail: req.body.DealerEmail
-    }
-    dealer.DealerLogin(LoginData.DealerEmail, function (err, result) {
-        console.log('**** result at DealerLogin of dealerController.js ****', result);
-        if (result === 'No DataFound') {
+//-Delete Users, by verifying jwt Token.
+exports.deleteUserInfo = function (req, res) {
+    var token = req.headers['x-access-token'];
+    auth.verifyToken(token, function (err, decoded) {
+        if (err) {
             res.send({
-                'Error Code': 101,
-                Message: 'Email Id not available/Invalid Email Id',
+                "Error Code": 010,
+                "Message": 'Invalid Token',
+                "Error": err
             });
         } else {
-            var resultPassword = bcrypt.compareSync(req.body.DealerPassword, result[0].DealerPassword)
-            if (!resultPassword)
-                return res.status(401).send({
-                    auth: false,
-                    token: null,
-                    Message: 'Password Invalid/Session expired',
-                });
-            var token = jwt.sign({
-                DealerEmail: req.body.DealerEmail
-            }, config.secret, {
-                expiresIn: 86400 // expires in 24 hours
-            });
-            res.status(200).send({
-                auth: true,
-                token: token,
+            var deleteUserData = {
+                email: req.body.email
+            }
+            users.deleteUser(deleteUserData.email, function (err, result) {
+                if (err) {
+                    res.send({
+                        'Error Code': 101,
+                        'Error': err
+                    });
+                } else {
+                    res.send({
+                        'Success': 200,
+                        'Data': result
+                    });
+                }
             });
         }
     });
+
 };
