@@ -2,8 +2,7 @@
 
 var express = require('express');
 var mysql = require('mysql');
-var usersRouter = require('./routes/users');
-var userRouter = require('./routes/users')
+var userRouter = require('./routes/users');
 var bodyParser = require('body-parser');
 
 var app = express();
@@ -106,12 +105,12 @@ app.use(bodyParser.json());
 // })
 
 
-// calls the users router
-app.use('/users', userRouter);
+// calls the User router
+app.use('/User', userRouter);
 
 
 
-// Listening one port 3002
+// Listening on port 3002
 
 app.listen('3002', function (err) {
     if (err)

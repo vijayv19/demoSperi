@@ -58,7 +58,7 @@ exports.getUserInfo = function (req, res) {
 
 //- Registration of User with token.
 exports.postUserInfo = function (req, res) {
-    console.log('**** req.body ****', req.body);
+    // console.log('**** req.body ****', req.body);
     var UserInputData = {
         "userid": req.body.userid,
         "first_name": req.body.first_name,

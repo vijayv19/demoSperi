@@ -21,7 +21,7 @@ module.exports.userInfo = function (UsersData, callback) {
                 query = 'SELECT * FROM users';
                 obj = UsersData;
             }
-            console.log('**** obj ****', obj);
+            // console.log('**** obj ****', obj);
             connection.query(query, obj, function (err, results) {
                 if (err) {
                     logger.error({
@@ -48,7 +48,6 @@ module.exports.registration = function (userData, callback) {
             throw err;
         } else {
             connection.query('INSERT INTO users SET ?', userData, function (err, rows) {
-                console.log('**** rows ****', rows);
                 if (err) {
                     callback(err, null);
                 } else if (_.isEmpty(userData)) {
