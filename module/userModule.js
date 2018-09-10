@@ -1,5 +1,7 @@
 var express = require('express');
-var database = require('../Database/database');
+// var database = require('../Database/database');
+var database = require('../Config/db_config');
+
 var _ = require('lodash');
 var logger = require('../logs/logInfo').logger;
 
